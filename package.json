@@ -1,4 +1,12 @@
 {
+  "name": "koda-b6-backend-node",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "dev": "node --watch --env-file=.env src/main.js"
+  },
   "dependencies": {
     "argon2": "^0.44.0",
     "dotenv": "^17.4.0",
