@@ -16,7 +16,7 @@ import { db } from "../lib/db.js"
  * @returns {Promise<Product>}
  */
 
-export async function GatAllProduct() {
+export async function GetAllProduct() {
   const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products`
 
   const result = await db().query(sql)
@@ -25,8 +25,14 @@ export async function GatAllProduct() {
 
 export async function GetProductId(productId) {
   const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products WHERE product_id = $1`
-
-  const result = await db().query(sql,[productId])
+  const values = [productId]
+  const result = await db().query(sql, values)
   return result.rows ?? null
-  
+}
+
+export async function GetProductName(productName) {
+  const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products WHERE name ILIKE $1`
+  const values = [`%${productName}%`]
+  const result = await db().query(sql, values)
+  return result.rows ?? null
 }
