@@ -21,5 +21,12 @@ export async function GatAllProduct() {
 
   const result = await db().query(sql)
   return result.rows ?? null
+}
+
+export async function GetProductId(productId) {
+  const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products WHERE product_id = $1`
+
+  const result = await db().query(sql,[productId])
+  return result.rows ?? null
   
 }
