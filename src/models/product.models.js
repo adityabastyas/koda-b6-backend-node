@@ -23,6 +23,11 @@ export async function GetAllProduct() {
   return result.rows ?? null
 }
 
+/**
+ * get product id
+ * @param {int} productId 
+ * @returns {Promise<Product[]>}
+ */
 export async function GetProductId(productId) {
   const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products WHERE product_id = $1`
   const values = [productId]
@@ -30,6 +35,11 @@ export async function GetProductId(productId) {
   return result.rows ?? null
 }
 
+/**
+ * seacrh product by name
+ * @param {string} productName 
+ * @returns {Promise<Product[]>}
+ */
 export async function GetProductName(productName) {
   const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products WHERE name ILIKE $1`
   const values = [`%${productName}%`]
