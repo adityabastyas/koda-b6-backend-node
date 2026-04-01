@@ -23,3 +23,22 @@ export async function GetAllProduct(req, res) {
     "result" : products
   })
 }
+
+export async function GetProductId(req, res) {
+  const productId = await pm.GetProductId(req.params.id)
+
+  if (!productId){
+    return res.json({
+      "succes" : false,
+      "message" : "product id tidak ditemukan",
+      "result" : null
+    })
+  }
+
+  return res.json({
+    "success" : true,
+    "message" : "berhasil mendapatkan id",
+    "result" : productId
+  })
+  
+}
