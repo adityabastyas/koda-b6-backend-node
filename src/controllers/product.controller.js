@@ -1,4 +1,3 @@
-import { db } from "../lib/db.js"
 import * as pm from "../models/product.models.js"
 
 /**
@@ -90,6 +89,59 @@ export async function GetProductName(req, res) {
     "message" : "product name ditemukan",
     "result" : productName
   })
+}
 
-  
+/**
+ * CREATE PRODUCT
+ */
+export async function CreateProduct(req, res) {
+  const { kategory_id, name, description, price, image_url } = req.body
+
+  if (!kategory_id || !name || !price) {
+    return res.json({
+      success: false,
+      message: "kategory_id, name, price wajib",
+      result: null
+    })
+  }
+
+  const data = await pm.CreateProduct({
+    kategory_id,
+    name,
+    description,
+    price,
+    image_url
+  })
+
+  return res.json({
+    success: true,
+    message: "berhasil tambah product",
+    result: data
+  })
+}
+
+export async function UpdateProduct(req, res) {
+  const { kategory_id, name, description, price, image_url } = req.body
+
+  const data = await pm.UpdateProduct(req.params.id, {
+    kategory_id,
+    name,
+    description,
+    price,
+    image_url
+  })
+
+  if (!data) {
+    return res.json({
+      success: false,
+      message: "gagal update product",
+      result: null
+    })
+  }
+
+  return res.json({
+    success: true,
+    message: "berhasil update product",
+    result: data
+  })
 }
