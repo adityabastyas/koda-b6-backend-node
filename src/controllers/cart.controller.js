@@ -66,3 +66,25 @@ export async function GetCartUserId(req, res) {
   })
   
 }
+
+/**
+ * Delete
+ */
+export async function DeleteCart(req, res) {
+  const data = await cm.DeleteCart(req.params.id)
+
+  if(!data){
+    return res.json({
+      success : false,
+      message : "gagal delete cart",
+      result : null
+    })
+  }
+
+  return res.json({
+    success : true,
+    message : "berhasil delete cart",
+    result : data
+  })
+  
+}
