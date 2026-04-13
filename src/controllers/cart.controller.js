@@ -62,9 +62,32 @@ export async function GetCartUserId(req, res) {
   return res.json({
     success : true, 
     message : "berhasil ambil cart user",
-    return : data
+    result : data
   })
   
+}
+
+/**
+ * create
+ */
+export async function CreateCart(req, res) {
+  const {user_id} = req.body
+
+  if(!user_id){
+    return res.json({
+      success : false,
+      message : "user_id wajib diisi",
+      result : null
+    })
+  }
+
+  const data = await cm.CreateCart(user_id)
+  
+  return res.json({
+    success : true,
+    message : "berhasil buat cart",
+    result : data
+  })
 }
 
 /**
