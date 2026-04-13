@@ -145,3 +145,21 @@ export async function UpdateProduct(req, res) {
     result: data
   })
 }
+
+export async function DeleteProduct(req, res) {
+  const data = await pm.DeleteProduct(req.params.id)
+
+  if (!data) {
+    return res.json({
+      success: false,
+      message: "gagal delete product",
+      result: null
+    })
+  }
+
+  return res.json({
+    success: true,
+    message: "berhasil delete product",
+    result: data
+  })
+}
