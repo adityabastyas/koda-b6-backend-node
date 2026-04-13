@@ -44,3 +44,25 @@ export async function GetCartId(req, res) {
   })
   
 }
+
+/**
+ * get by user id
+ */
+export async function GetCartUserId(req, res) {
+  const data = await cm.GetCartUserId(req.params.user_id)
+
+  if (!data || data.length < 1){
+    return res.json({
+      success: false, 
+      message : "cart user tidak ditemukan",
+      result : null
+    })
+  }
+
+  return res.json({
+    success : true, 
+    message : "berhasil ambil cart user",
+    return : data
+  })
+  
+}
