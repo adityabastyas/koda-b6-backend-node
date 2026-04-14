@@ -45,7 +45,7 @@ jobs:
                   key: ${{ secrets.KEY }}
                   port: ${{ secrets.PORT }}
                   script: |
-                      cd server-adit-node-backend
+                      cd server-adit-node
                       docker compose pull backend
                       docker run --rm --network=server-adit-node-backend_webapps migrate/migrate:latest -source github://adityabastyas:${{ secrets.GITHUB_TOKEN }}@adityabastyas/koda-b6-backend-node/migrations -database postgresql://postgres:1@pg:5432/coffiShop?sslmode=disable up
                       docker compose up backend -d
