@@ -21,3 +21,17 @@ export async function getByProductId(productId) {
   const result = await pool.query(sql, [productId])
   return result.rows
 }
+
+/**
+ * Get by id
+ */
+export async function getById(id) {
+  const sql = `
+    SELECT product_size_id, product_id, name, add_price
+    FROM product_size
+    WHERE product_size_id = $1
+  `
+
+  const result = await pool.query(sql, [id])
+  return result.rows[0] || null
+}
