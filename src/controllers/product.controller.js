@@ -1,4 +1,5 @@
 import * as pm from "../models/product.models.js"
+import { constants } from "node:http2"
 
 /**
  * 
@@ -6,160 +7,173 @@ import * as pm from "../models/product.models.js"
  * @param {import ("express").Response} res 
  * @returns 
  */
-export async function GetAllProduct(req, res) {
+export async function getAll(req, res) {
+  try {
+    const products = await pm.getAll()
 
-  const {name} = req.query
-  if (name){
-    const product =  await pm.GetProductName(name)
-    if (product.length < 1) {
-      return res.json({
-      "success" : false,
-    "message" : "gagal mengambil product",
-    "result" : null
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "success",
+      result: products
     })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "terjadi kesalahan pada server"
+    })
+  }
+}
+
+/**
+ * 
+ * @param {import ("express").Request} req 
+ * @param {import ("express").Response} res 
+ * @returns 
+ */
+export async function getById(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
     }
-    return res.json({
-      "success" : true,
-    "message" : "berhasil mengambil product",
-    "result" : product
+
+    const product = await pm.getById(id)
+
+    if (!product) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "product tidak ditemukan"
+      })
+    }
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "success",
+      result: product
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: err.message
     })
   }
-
-  const products = await pm.GetAllProduct()
-
-  if (!products) {
-    return res.json({
-    "success" : false,
-    "message" : "gagal mengambil semua product",
-    "result" : null
-  })
-  }
-
-  return res.json({
-    "success" : true,
-    "message" : "berhasil mengambil semua product",
-    "result" : products
-  })
-}
-
-/**
- * 
- * @param {import ("express").Request} req 
- * @param {import ("express").Response} res 
- * @returns 
- */
-export async function GetProductId(req, res) {
-  const productId = await pm.GetProductId(req.params.id)
-
-  if (!productId){
-    return res.json({
-      "succes" : false,
-      "message" : "product id tidak ditemukan",
-      "result" : null
-    })
-  }
-
-  return res.json({
-    "success" : true,
-    "message" : "berhasil mendapatkan id",
-    "result" : productId
-  })
-  
-}
-
-/**
- * 
- * @param {import ("express").Request} req 
- * @param {import ("express").Response} res 
- */
-export async function GetProductName(req, res) {
-  console.log(req)
-  const productName = await pm.GetProductName()
-
-  if (!productName){
-    return res.json({
-      "succes" : false,
-      "message" : "product name tidak ada",
-      "result" : null
-    })
-  }
-
-  return res.json({
-    "success" : true,
-    "message" : "product name ditemukan",
-    "result" : productName
-  })
 }
 
 /**
  * CREATE PRODUCT
  */
-export async function CreateProduct(req, res) {
-  const { kategory_id, name, description, price, image_url } = req.body
+export async function create(req, res) {
+  try {
+    const { name, price } = req.body
 
-  if (!kategory_id || !name || !price) {
-    return res.json({
+    if (!name) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "nama product tidak boleh kosong"
+      })
+    }
+
+    if (!price || isNaN(price) || price <= 0) {
+       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+      message: "harga product tidak valid"
+    })
+   }
+
+    await pm.create(req.body)
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "product berhasil ditambahkan"
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
-      message: "kategory_id, name, price wajib",
-      result: null
+      message: "gagal menambahkan product"
     })
   }
-
-  const data = await pm.CreateProduct({
-    kategory_id,
-    name,
-    description,
-    price,
-    image_url
-  })
-
-  return res.json({
-    success: true,
-    message: "berhasil tambah product",
-    result: data
-  })
 }
 
-export async function UpdateProduct(req, res) {
-  const { kategory_id, name, description, price, image_url } = req.body
+export async function update(req, res) {
+  try {
+    const id = parseInt(req.params.id)
 
-  const data = await pm.UpdateProduct(req.params.id, {
-    kategory_id,
-    name,
-    description,
-    price,
-    image_url
-  })
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
+    }
 
-  if (!data) {
-    return res.json({
+    const { name, price } = req.body
+
+    if (!name) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "nama product tidak boleh kosong"
+      })
+    }
+
+    if (!price || isNaN(price) || price <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+       success: false,
+       message: "harga product tidak valid"
+     })
+    }
+
+    const updated = await pm.update(id, req.body)
+
+    if (!updated) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+       success: false,
+       message: "product tidak ditemukan"
+    })
+    }
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "product berhasil diupdate"
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
-      message: "gagal update product",
-      result: null
+      message: "gagal update product"
     })
   }
-
-  return res.json({
-    success: true,
-    message: "berhasil update product",
-    result: data
-  })
 }
 
-export async function DeleteProduct(req, res) {
-  const data = await pm.DeleteProduct(req.params.id)
+export async function remove(req, res) {
+  try {
+    const id = parseInt(req.params.id)
 
-  if (!data) {
-    return res.json({
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
+    }
+
+    const deleted = await pm.remove(id)
+
+    if (!deleted) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "product tidak ditemukan"
+      })
+    }
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "product berhasil dihapus"
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
-      message: "gagal delete product",
-      result: null
+      message: "gagal menghapus product"
     })
   }
-
-  return res.json({
-    success: true,
-    message: "berhasil delete product",
-    result: data
-  })
 }
