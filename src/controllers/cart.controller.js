@@ -1,113 +1,96 @@
 import * as cm from "../models/cart.models.js"
+import { constants } from "node:http2"
 
 /**
- * GET ALL
+ * GET ALL CART (ADMIN ONLY OPTIONAL)
  */
-export async function GetAllCart(req, res) {
-  const data = await cm.GetAllCart()
+export async function getAll(req, res) {
+  try {
+    const carts = await cm.getAll()
 
-  if (!data) {
-    return res.json({
-      success : false,
-      message : "gagal ambil cart",
-      result : null
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "success",
+      result: carts
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: err.message
     })
   }
-
-  return res.json({
-    success : true,
-    message : "berhasil ambil cart",
-    result : data
-  })
-  
 }
 
 /**
- * get by id
+ * GET MY CART (USER LOGIN)
  */
+export async function getMyCart(req, res) {
+  try {
+    const userId = res.locals.id
 
-export async function GetCartId(req, res) {
-  const data = await cm.GetCartId(req.params.id)
+    if (!userId) {
+      return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
+        success: false,
+        message: "unauthorized"
+      })
+    }
 
-  if (!data || data.length < 1) {
-    return res.json({
-      success : false,
-      message : "cart tidak ditemukan",
-      result : null
+    const cart = await cm.getByUserId(userId)
+
+    if (!cart) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "cart tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "success",
+      result: cart
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: err.message
     })
   }
-
-  return res.json({
-    success : true,
-    message : "berhasil ambil cart",
-    result : data
-  })
-  
 }
 
 /**
- * get by user id
+ * CREATE CART
  */
-export async function GetCartUserId(req, res) {
-  const data = await cm.GetCartUserId(req.params.user_id)
+export async function create(req, res) {
+  try {
+    const userId = res.locals.id
 
-  if (!data || data.length < 1){
-    return res.json({
-      success: false, 
-      message : "cart user tidak ditemukan",
-      result : null
+    if (!userId) {
+      return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
+        success: false,
+        message: "unauthorized"
+      })
+    }
+
+    const existing = await cm.getByUserId(userId)
+
+    if (existing) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "cart sudah ada"
+      })
+    }
+
+    const cart = await cm.create(userId)
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "cart berhasil dibuat",
+      result: cart
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
     })
   }
-
-  return res.json({
-    success : true, 
-    message : "berhasil ambil cart user",
-    result : data
-  })
-  
-}
-
-/**
- * create
- */
-export async function CreateCart(req, res) {
-  const {user_id} = req.body
-
-  if(!user_id){
-    return res.json({
-      success : false,
-      message : "user_id wajib diisi",
-      result : null
-    })
-  }
-
-  const data = await cm.CreateCart(user_id)
-  
-  return res.json({
-    success : true,
-    message : "berhasil buat cart",
-    result : data
-  })
-}
-
-/**
- * Delete
- */
-export async function DeleteCart(req, res) {
-  const data = await cm.DeleteCart(req.params.id)
-
-  if(!data){
-    return res.json({
-      success : false,
-      message : "gagal delete cart",
-      result : null
-    })
-  }
-
-  return res.json({
-    success : true,
-    message : "berhasil delete cart",
-    result : data
-  })
-  
 }
