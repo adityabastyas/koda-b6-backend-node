@@ -121,3 +121,38 @@ export async function update(req, res) {
     })
   }
 }
+
+/**
+ * DELETE ITEM
+ */
+export async function remove(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "cart item id tidak valid"
+      })
+    }
+
+    const deleted = await cim.remove(id)
+
+    if (!deleted) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "item tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "item berhasil dihapus dari cart"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
