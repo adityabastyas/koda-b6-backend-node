@@ -33,3 +33,24 @@ export async function getAll() {
   const result = await pool.query(sql)
   return result.rows
 }
+
+
+export async function getByProductId(productId) {
+  const sql = `
+    SELECT 
+      r.reviews_id,
+      r.product_id,
+      r.user_id,
+      r.message,
+      r.rating,
+      u.full_name,
+      u.profile_pic
+    FROM reviews r
+    JOIN users u ON r.user_id = u.user_id
+    ORDER BY r.reviews_id DESC
+    LIMIT 10
+  `
+
+  const result = await pool.query(sql, [productId])
+  return result.rows
+}
