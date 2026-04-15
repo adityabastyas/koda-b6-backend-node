@@ -1,12 +1,17 @@
 import { Router } from "express"
 import * as usersController from "../controllers/users.controller.js"
+import auth from "../middlewares/auth.middleware.js"
+import upload from "../middlewares/upload.middleware.js"
 
 const usersRouter = Router()
 
-usersRouter.get("/users", usersController.getAllUsers)
-usersRouter.get("/users/:id", usersController.getUserById)
-usersRouter.post("/users", usersController.createUser)
-usersRouter.patch("/users/:id", usersController.updateUser)
-usersRouter.delete("/users/:id", usersController.deleteUser)
+usersRouter.use(auth)
+
+usersRouter.get("/", usersController.getAll)
+
+usersRouter.post("/upload", upload.single("file"), usersController.uploadPhoto)
+
+usersRouter.patch("/profile", usersController.updateProfile)
+
 
 export default usersRouter
