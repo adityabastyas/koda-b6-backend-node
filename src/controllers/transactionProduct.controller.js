@@ -15,3 +15,17 @@ export async function GetByTransactionId(req, res) {
     result: data
   })
 }
+
+/**
+ * CREATE
+ */
+export async function Create(req, res) {
+  const id = parseInt(req.params.transaction_id)
+
+  await tpm.create(id, req.body)
+
+  return res.status(constants.HTTP_STATUS_OK).json({
+    success: true,
+    message: "product berhasil ditambahkan ke transaksi"
+  })
+}
