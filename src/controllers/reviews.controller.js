@@ -107,3 +107,24 @@ export async function Create(req, res) {
     message: "review berhasil ditambahkan"
   })
 }
+
+/**
+ * DELETE
+ */
+export async function Delete(req, res) {
+  const id = parseInt(req.params.id)
+
+  if (isNaN(id)) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: "id harus berupa angka"
+    })
+  }
+
+  await rm.remove(id)
+
+  return res.status(constants.HTTP_STATUS_OK).json({
+    success: true,
+    message: "review berhasil dihapus"
+  })
+}
