@@ -65,3 +65,38 @@ export async function getById(req, res) {
     })
   }
 }
+
+/**
+ * CREATE
+ */
+export async function create(req, res) {
+  try {
+    const { product_id, name, add_price } = req.body 
+
+    if (!product_id || product_id <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "product id tidak valid"
+      })
+    }
+
+    if (!name) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "nama size tidak boleh kosong"
+      })
+    }
+
+    await pm.create(req.body)
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "size berhasil ditambahkan"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
