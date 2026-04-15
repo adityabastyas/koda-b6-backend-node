@@ -104,3 +104,47 @@ export async function create(req, res) {
     })
   }
 }
+
+/**
+ * UPDATE
+ */
+export async function update(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
+    }
+
+    const { temperature } = req.body || {}
+
+    if (!temperature) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "temperature tidak boleh kosong"
+      })
+    }
+
+    const updated = await pm.update(id, req.body)
+
+    if (!updated) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "variant tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "variant berhasil diupdate"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
