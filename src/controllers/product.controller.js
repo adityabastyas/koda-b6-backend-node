@@ -1,5 +1,6 @@
 import * as pm from "../models/product.models.js"
 import { constants } from "node:http2"
+import redis from "../lib/redis.js"
 
 /**
  * 
@@ -9,7 +10,25 @@ import { constants } from "node:http2"
  */
 export async function getAll(req, res) {
   try {
+    const cached = await redis.get("products")
+
+    if (cached) {
+      console.log("ambil dari redis")
+
+      return res.status(constants.HTTP_STATUS_OK).json({
+        success: true,
+        message: "success (cache)",
+        result: JSON.parse(cached)
+      })
+    }
+    
     const products = await pm.getAll()
+
+    await redis.set("products", JSON.stringify(products), {
+      EX: 300
+    })
+
+    console.log("ambil dari DB + simpan redis")
 
     res.status(constants.HTTP_STATUS_OK).json({
       success: true,
@@ -41,6 +60,20 @@ export async function getById(req, res) {
       })
     }
 
+    const key = `product:${id}`
+
+    const cached = await redis.get(key)
+
+    if (cached) {
+      console.log("ambil product dari redis")
+
+      return res.status(constants.HTTP_STATUS_OK).json({
+        success: true,
+        message: "success (cache)",
+        result: JSON.parse(cached)
+      })
+    }
+
     const product = await pm.getById(id)
 
     if (!product) {
@@ -49,6 +82,10 @@ export async function getById(req, res) {
         message: "product tidak ditemukan"
       })
     }
+
+    await redis.set(key, JSON.stringify(product), { EX: 300 })
+
+    console.log("ambil dari DB + simpan redis")
 
     res.status(constants.HTTP_STATUS_OK).json({
       success: true,
@@ -85,6 +122,8 @@ export async function create(req, res) {
    }
 
     await pm.create(req.body)
+
+    await redis.del("products")
 
     res.status(constants.HTTP_STATUS_OK).json({
       success: true,
@@ -134,6 +173,9 @@ export async function update(req, res) {
     })
     }
 
+    await redis.del("products")
+    await redis.del(`product:${id}`)
+
     res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "product berhasil diupdate"
@@ -165,6 +207,9 @@ export async function remove(req, res) {
         message: "product tidak ditemukan"
       })
     }
+
+    await redis.del("products")
+    await redis.del(`product:${id}`)
 
     res.status(constants.HTTP_STATUS_OK).json({
       success: true,
