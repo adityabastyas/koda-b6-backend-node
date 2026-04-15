@@ -49,3 +49,32 @@ export async function GetById(req, res) {
     })
   }
 }
+
+/**
+ * GET BY USER ID
+ */
+export async function GetByUserId(req, res) {
+  try {
+    const id = parseInt(req.params.user_id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "user id harus angka"
+      })
+    }
+
+    const data = await tm.getByUserId(id)
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "success",
+      result: data
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
