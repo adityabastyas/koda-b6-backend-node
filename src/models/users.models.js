@@ -6,9 +6,9 @@ import { db } from "../lib/db.js"
  * @property {string} full_name
  * @property {string} email
  * @property {string} password
- * @property {string} address
- * @property {string} phone
- * @property {string} profile_pic
+ * @property {string|null} address
+ * @property {string|null} phone
+ * @property {string|null} profile_pic
  * @property {Date} created_at
  */
 
@@ -18,7 +18,7 @@ import { db } from "../lib/db.js"
  */
 export async function getAllUsers() {
   const result = await db.query(
-    `SELECT user_id, full_name, email, address, phone, profile_pic, created_at
+    `SELECT user_id, full_name, email, address, phone, profile_pic, created_at, role
      FROM users
      ORDER BY user_id ASC`
   )
@@ -47,7 +47,7 @@ export async function getUserById(user_id) {
  */
 export async function findUserByEmail(email) {
   const result = await pool.query(
-    `SELECT user_id, full_name, email, password, address, phone, profile_pic, created_at
+    `SELECT user_id, full_name, email, password, address, phone, profile_pic, created_at, role
      FROM users
      WHERE email = $1`,
     [email]
