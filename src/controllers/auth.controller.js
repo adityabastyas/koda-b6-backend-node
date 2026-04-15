@@ -1,7 +1,8 @@
 import * as forgotModel from "../models/forgotPassword.models.js"
 import * as userModel from "../models/users.models.js"
 import { constants } from "node:http2"
-import { GenerateHash } from "../lib/hash.js"
+import { GenerateHash, VerifyHash } from "../lib/hash.js"
+import { GenerateToken } from "../lib/jwt.js"
 
 export async function requestForgotPassword(req, res) {
   try {
@@ -134,6 +135,57 @@ export async function register(req, res) {
     res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "register success"
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
+
+/**
+ * Login user
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<void>}
+ */
+export async function login(req, res) {
+  try {
+    const { email, password } = req.body
+
+    const user = await userModel.findByEmail(email)
+
+    if (!user) {
+      return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
+        success: false,
+        message: "email atau password salah"
+      })
+    }
+
+    console.log("HASH DB:", user.password)
+
+    const valid = await VerifyHash(password, user.password)
+
+    if (!valid) {
+      return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
+        success: false,
+        message: "invalid email or password"
+      })
+    }
+
+    const token = GenerateToken(user.user_id, user.role)
+
+    const safeUser = { ...user }
+    delete safeUser.password
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "login success",
+      result: {
+        user: safeUser,
+        token
+      }
     })
   } catch (err) {
     res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
