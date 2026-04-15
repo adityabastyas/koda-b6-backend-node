@@ -1,110 +1,167 @@
 import * as km from "../models/kategory.models.js"
+import { constants } from "node:http2"
 
 /**
- * GET ALL
+ * GET ALL KATEGORY
  */
-export async function GetAllKategory(req, res) {
-  const data = await km.GetAllKategory()
+export async function getAll(req, res) {
+  try {
+    const data = await km.getAll()
 
-  if (!data) {
-    return res.json({
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "success",
+      result: data
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "gagal ambil kategory",
-      result: null
+      message: err.message
     })
   }
-
-  return res.json({
-    success: true,
-    message: "berhasil ambil kategory",
-    result: data
-  })
 }
 
 /**
- * GET BY ID
+ * GET KATEGORY BY ID
  */
-export async function GetKategoryId(req, res) {
-  const data = await km.GetKategoryId(req.params.id)
+export async function getById(req, res) {
+  try {
+    const id = parseInt(req.params.id)
 
-  if (!data || data.length < 1) {
-    return res.json({
+    if (isNaN(id) || id <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id tidak valid"
+      })
+    }
+
+    const data = await km.getById(id)
+
+    if (!data) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "kategory tidak ditemukan"
+      })
+    }
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "success",
+      result: data
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "kategory tidak ditemukan",
-      result: null
+      message: err.message
     })
   }
-
-  return res.json({
-    success: true,
-    message: "berhasil ambil kategory",
-    result: data
-  })
 }
 
 /**
- * CREATE
+ * CREATE KATEGORY
  */
-export async function CreateKategory(req, res) {
-  const { name } = req.body
+export async function create(req, res) {
+  try {
+    const { name } = req.body
 
-  if (!name) {
-    return res.json({
+    if (!name) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "name wajib diisi"
+      })
+    }
+
+    const data = await km.create(name)
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "kategory berhasil ditambahkan",
+      result: data
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
-      message: "name wajib diisi",
-      result: null
+      message: err.message
     })
   }
-
-  const data = await km.CreateKategory(name)
-
-  return res.json({
-    success: true,
-    message: "berhasil tambah kategory",
-    result: data
-  })
 }
 
 /**
- * UPDATE
+ * UPDATE KATEGORY
  */
-export async function UpdateKategory(req, res) {
-  const { name } = req.body
+export async function update(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+    const { name } = req.body
 
-  const data = await km.UpdateKategory(req.params.id, name)
+    if (isNaN(id) || id <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id tidak valid"
+      })
+    }
 
-  if (!data) {
-    return res.json({
+    if (!name) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "name wajib diisi"
+      })
+    }
+
+    const data = await km.update(id, name)
+
+    if (!data) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "kategory tidak ditemukan"
+      })
+    }
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "kategory berhasil diupdate",
+      result: data
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
-      message: "gagal update",
-      result: null
+      message: err.message
     })
   }
-
-  return res.json({
-    success: true,
-    message: "berhasil update",
-    result: data
-  })
 }
 
 /**
- * DELETE
+ * DELETE KATEGORY
  */
-export async function DeleteKategory(req, res) {
-  const data = await km.DeleteKategory(req.params.id)
+export async function remove(req, res) {
+  try {
+    const id = parseInt(req.params.id)
 
-  if (!data) {
-    return res.json({
+    if (isNaN(id) || id <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id tidak valid"
+      })
+    }
+
+    const data = await km.remove(id)
+
+    if (!data) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "kategory tidak ditemukan"
+      })
+    }
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "kategory berhasil dihapus",
+      result: data
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
-      message: "gagal delete",
-      result: null
+      message: err.message
     })
   }
-
-  return res.json({
-    success: true,
-    message: "berhasil delete",
-    result: data
-  })
 }
