@@ -94,3 +94,92 @@ export async function create(req, res) {
     })
   }
 }
+
+/**
+ * UPDATE
+ */
+export async function update(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
+    }
+
+    const {
+      product_id,
+      discount_rate
+    } = req.body || {}
+
+    if (!product_id || product_id <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "product id tidak valid"
+      })
+    }
+
+    if (!discount_rate || discount_rate <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "discount rate tidak valid"
+      })
+    }
+
+    const updated = await dm.update(id, req.body)
+
+    if (!updated) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "discount tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "discount berhasil diupdate"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
+
+/**
+ * DELETE
+ */
+export async function remove(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
+    }
+
+    const deleted = await dm.remove(id)
+
+    if (!deleted) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "discount tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "discount berhasil dihapus"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
