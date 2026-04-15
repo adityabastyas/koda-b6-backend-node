@@ -7,7 +7,7 @@ const usersRouter = Router()
 
 usersRouter.use(auth)
 
-usersRouter.get("/", usersController.getAll)
+usersRouter.get("", usersController.getAll)
 
 usersRouter.post("/upload", upload.single("file"), usersController.uploadPhoto)
 
