@@ -78,3 +78,32 @@ export async function GetByUserId(req, res) {
     })
   }
 }
+
+/**
+ * CREATE
+ */
+export async function Create(req, res) {
+  try {
+    const userId = res.locals.id // dari middleware auth
+
+    const data = {
+      ...req.body,
+      user_id: userId
+    }
+
+    const result = await tm.create(data)
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "transaksi berhasil di buat",
+      result: {
+        transaction_id: result.transaction_id
+      }
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
