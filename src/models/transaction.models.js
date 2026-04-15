@@ -26,3 +26,17 @@ export async function getById(id) {
   const result = await pool.query(sql, [id])
   return result.rows[0] || null
 }
+
+/**
+ * GET BY USER
+ */
+export async function getByUserId(userId) {
+  const sql = `
+    SELECT transaction_id, user_id, promo_id, fullname, email, address,
+           delivery_type, subtotal, tax, total, tanggal
+    FROM transaction
+    WHERE user_id = $1
+  `
+  const result = await pool.query(sql, [userId])
+  return result.rows
+}
