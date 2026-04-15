@@ -56,3 +56,28 @@ export async function create(data) {
 
   return result.rows[0]
 }
+
+/**
+ * Update
+ */
+export async function update(id, data) {
+  const { product_id, temperature, add_price } = data
+
+  const sql = `
+    UPDATE product_variant
+    SET product_id = $2,
+        temperature = $3,
+        add_price = $4
+    WHERE variant_id = $1
+    RETURNING variant_id, product_id, temperature, add_price
+  `
+
+  const result = await pool.query(sql, [
+    id,
+    product_id,
+    temperature,
+    add_price
+  ])
+
+  return result.rows[0] || null
+}
