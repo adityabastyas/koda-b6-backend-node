@@ -29,3 +29,17 @@ export async function Create(req, res) {
     message: "product berhasil ditambahkan ke transaksi"
   })
 }
+
+/**
+ * DELETE
+ */
+export async function Delete(req, res) {
+  const id = parseInt(req.params.id)
+
+  await tpm.remove(id)
+
+  return res.status(constants.HTTP_STATUS_OK).json({
+    success: true,
+    message: "product berhasil dihapus dari transaksi"
+  })
+}
