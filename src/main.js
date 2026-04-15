@@ -7,6 +7,7 @@ import docsRouter from "./routes/docs.js"
 import corsMiddleware from "./lib/cors.js"
 import authRouter from "./routes/auth.router.js"
 import productImagesRouter from "./routes/productImages.router.js"
+import productSizeRouter from "./routes/productSize.router.js"
 
 const app = express()
 const PORT = process.env.PORT || 8888
@@ -23,6 +24,7 @@ app.use("/products", productRouter)
 app.use("/kategorys", kategoryRouter)
 app.use("/docs", docsRouter)
 app.use("/product-images", productImagesRouter)
+app.use("/product-sizes", productSizeRouter)
 
 app.listen(PORT, function () {
   console.log(`App listening on port ${PORT}`)
