@@ -56,3 +56,41 @@ export async function getById(req, res) {
     })
   }
 }
+
+/**
+ * CREATE
+ */
+export async function create(req, res) {
+  try {
+    const {
+      product_id,
+      discount_rate
+    } = req.body || {}
+
+    if (!product_id || product_id <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "product id tidak valid"
+      })
+    }
+
+    if (!discount_rate || discount_rate <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "discount rate tidak valid"
+      })
+    }
+
+    await dm.create(req.body)
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "discount berhasil ditambahkan"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
