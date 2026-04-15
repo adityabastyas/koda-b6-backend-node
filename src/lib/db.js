@@ -1,27 +1,21 @@
-// import pg from "pg"
-// const {Pool} = pg
+import { Pool } from "pg"
 
-// export const pool = new Pool({
-//   host: process.env.DB_HOST,
-//   port: process.env.DB_PORT,
-//   user: process.env.DB_USER,
-//   password: process.env.DB_PASSWORD,
-//   database: process.env.DB_NAME,
-//   ssl: false
-// })
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+})
 
-// // export async function db() {
-// //   const client = await pool.connect();
-// //   return client
-  
-// // }
+pool.connect()
+  .then(client => {
+    console.log("database berhasil terhubung")
+    client.release()
+  })
+  .catch(err => {
+    console.error("gagal konek ke database:", err.message)
+    process.exit(1)
+  })
 
-
-import {Pool} from "pg"
-
-//rumah 1 = denah 1
-const pool = new Pool()
-
-export function db(){
-  return  pool
-}
+export default pool
