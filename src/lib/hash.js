@@ -21,9 +21,9 @@ export async function GenerateHash(password) {
  * @param {string} password 
  * @returns {Promise<boolean>}
  */
-export async function VerifyHash(hash, password) {
+export async function VerifyHash(password, hash) {
   try {
-    return await argon2.veri*fy(hash, password)
+    return await argon2.verify(hash, password)
   } catch (err) {
     throw new Error("failed to verify password")
   }
