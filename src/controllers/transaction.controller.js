@@ -107,3 +107,31 @@ export async function Create(req, res) {
     })
   }
 }
+
+/**
+ * DELETE
+ */
+export async function Delete(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus angka"
+      })
+    }
+
+    await tm.remove(id)
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "transaksi berhasil dihapus"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
