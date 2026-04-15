@@ -94,7 +94,9 @@ export async function login(req, res) {
       })
     }
 
-    const valid = await VerifyHash(user.password, password)
+    console.log("HASH DB:", user.password)
+
+    const valid = await VerifyHash(password, user.password)
 
     if (!valid) {
       return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
