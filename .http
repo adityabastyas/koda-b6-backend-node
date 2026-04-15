@@ -34,5 +34,14 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:8888/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "adit@mail.com"
+}
+
+###
+
 GET http://localhost:8888/users
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3LCJyb2xlIjoidXNlciIsImlhdCI6MTc3NjIyNzUzOCwiZXhwIjoxNzc2MjI4MTM4fQ.QNUFtcF2sUeIp-U48q8zsbRaZQHFR4aE9jnG7mfAu5k

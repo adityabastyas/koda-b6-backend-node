@@ -17,7 +17,7 @@ app.use(corsMiddleware)
 app.use("/uploads", express.static("uploads"))
 
 app.use("/auth", authRouter)
-app.use("/users", usersRouter)
+app.use("/users", authRouter)
 app.use("/products", productRouter)
 app.use("/kategorys", kategoryRouter)
 app.use("/docs", docsRouter)
