@@ -81,3 +81,17 @@ export async function update(id, data) {
 
   return result.rows[0] || null
 }
+
+/**
+ * Delete
+ */
+export async function remove(id) {
+  const sql = `
+    DELETE FROM product_variant
+    WHERE variant_id = $1
+    RETURNING variant_id, product_id, temperature, add_price
+  `
+
+  const result = await pool.query(sql, [id])
+  return result.rows[0] || null
+}
