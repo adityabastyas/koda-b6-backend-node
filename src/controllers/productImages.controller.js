@@ -64,3 +64,38 @@ export async function create(req, res) {
     })
   }
 }
+
+/**
+ * DELETE
+ */
+export async function remove(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
+    }
+
+    const deleted = await pm.remove(id)
+
+    if (!deleted) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "image tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "image berhasil dihapus"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
