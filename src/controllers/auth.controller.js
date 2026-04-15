@@ -97,3 +97,48 @@ export async function resetPassword(req, res) {
   }
 }
 
+
+/**
+ * Register user
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<void>}
+ */
+export async function register(req, res) {
+  try {
+    const { full_name, email, password } = req.body
+
+    if (!email || !password) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "email & password tidak boleh kosong"
+      })
+    }
+
+    const existingUser = await userModel.findByEmail(email)
+    if (existingUser) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "email sudah terdaftar"
+      })
+    }
+
+    const hashedPassword = await GenerateHash(password)
+
+    await userModel.save({
+      full_name,
+      email,
+      password: hashedPassword
+    })
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "register success"
+    })
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
