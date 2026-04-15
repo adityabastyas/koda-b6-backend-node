@@ -33,4 +33,3 @@ export async function getAll() {
   const result = await pool.query(sql)
   return result.rows
 }
-
