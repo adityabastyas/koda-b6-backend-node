@@ -1,23 +1,24 @@
-import { db } from "../lib/db.js"
+import pool from "../lib/db.js"
 
 /**
  * @typedef {Object} User
  * @property {number} user_id
  * @property {string} full_name
  * @property {string} email
- * @property {string} password
+ * @property {string|undefined} password
  * @property {string|null} address
  * @property {string|null} phone
  * @property {string|null} profile_pic
  * @property {Date} created_at
+ * @property {string} role
  */
 
 /**
  * Get all users
  * @returns {Promise<User[]>}
  */
-export async function getAllUsers() {
-  const result = await db.query(
+export async function getAll() {
+  const result = await pool.query(
     `SELECT user_id, full_name, email, address, phone, profile_pic, created_at, role
      FROM users
      ORDER BY user_id ASC`
@@ -25,27 +26,13 @@ export async function getAllUsers() {
   return result.rows
 }
 
-/**
- * Get user by id
- * @param {number} user_id
- * @returns {Promise<User|null>}
- */
-export async function getUserById(user_id) {
-  const result = await pool.query(
-    `SELECT user_id, full_name, email, address, phone, profile_pic, created_at
-     FROM users
-     WHERE user_id = $1`,
-    [user_id]
-  )
-  return result.rows[0] || null
-}
 
 /**
  * Find user by email
  * @param {string} email
  * @returns {Promise<User|null>}
  */
-export async function findUserByEmail(email) {
+export async function findByEmail(email) {
   const result = await pool.query(
     `SELECT user_id, full_name, email, password, address, phone, profile_pic, created_at, role
      FROM users
@@ -56,74 +43,68 @@ export async function findUserByEmail(email) {
 }
 
 /**
- * Create new user
  * @param {Object} data
- * @returns {Promise<User>}
+ * @returns {Promise<Pick<User, "user_id" | "full_name" | "email" | "role">>}
  */
-export async function createUser(data) {
+export async function save(data) {
   const {
     full_name,
     email,
     password,
-    address = null,
-    phone = null,
-    profile_pic = null
   } = data
 
   const result = await pool.query(
-    `INSERT INTO users (full_name, email, password, address, phone, profile_pic)
-     VALUES ($1, $2, $3, $4, $5, $6)
-     RETURNING user_id, full_name, email, address, phone, profile_pic, created_at`,
-    [full_name, email, password, address, phone, profile_pic]
+    `INSERT INTO users (full_name, email, password)
+     VALUES ($1, $2, $3)
+     RETURNING user_id, full_name, email, role`,
+    [full_name, email, password]
   )
   return result.rows[0]
 }
 
 /**
- * Update user by id
+ * Update profile
  * @param {number} user_id
  * @param {Object} data
- * @returns {Promise<User|null>}
+ * @returns {Promise<void>}
  */
-export async function updateUser(user_id, data) {
-  const fields = []
-  const values = [user_id]
-  let paramCount = 2
+export async function updateProfile(user_id, data) {
+  const { full_name, email, phone, address } = data
 
-  const allowedFields = ["full_name", "email", "password", "address", "phone", "profile_pic"]
-
-  for (const key of allowedFields) {
-    if (data[key] !== undefined) {
-      fields.push(`${key} = $${paramCount}`)
-      values.push(data[key])
-      paramCount++
-    }
-  }
-
-  if (fields.length === 0) {
-    return getUserById(user_id)
-  }
-
-  const query = `
-    UPDATE users SET ${fields.join(", ")}
-    WHERE user_id = $1
-    RETURNING user_id, full_name, email, address, phone, profile_pic, created_at`
-
-  const result = await pool.query(query, values)
-  return result.rows[0] || null
+  await pool.query(`
+    UPDATE users
+    SET full_name = $1,
+        email = $2,
+        phone = $3,
+        address = $4
+    WHERE user_id = $5
+  `, [full_name, email, phone, address, user_id])
 }
 
 /**
- * Delete user by id
+ * Update profile picture
  * @param {number} user_id
- * @returns {Promise<User|null>}
+ * @param {string} path
+ * @returns {Promise<void>}
  */
-export async function deleteUser(user_id) {
-  const result = await pool.query(
-    `DELETE FROM users
-     WHERE user_id = $1
-     RETURNING user_id, full_name, email, address, phone, profile_pic, created_at`,
-    [user_id]
-  )
-  return result.rows[0] || null
+export async function updateProfilePic(user_id, path) {
+  await pool.query(`
+    UPDATE users
+    SET profile_pic = $1
+    WHERE user_id = $2
+  `, [path, user_id])
+}
+
+/**
+ * Update password
+ * @param {string} email
+ * @param {string} newPassword
+ * @returns {Promise<void>}
+ */
+export async function updatePassword(email, newPassword) {
+  await pool.query(`
+    UPDATE users
+    SET password = $1
+    WHERE email = $2
+  `, [newPassword, email])
 }
