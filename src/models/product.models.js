@@ -1,7 +1,7 @@
-import { db } from "../lib/db.js"
+import pool from "../lib/db.js"
 
 /**
- * @typedef Product 
+ * @typedef {Object} Product 
  * @property {number} product_id
  * @property {number} kategory_id
  * @property {string} name
@@ -16,46 +16,40 @@ import { db } from "../lib/db.js"
  * @returns {Promise<Product[]>}
  */
 
-export async function GetAllProduct() {
+export async function getAll() {
   const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products`
 
-  const result = await db().query(sql)
-  return result.rows ?? null
+  const result = await pool.query(sql)
+  return result.rows
 }
 
 /**
  * get product id
  * @param {number} productId 
- * @returns {Promise<Product[]>}
+ * @returns {Promise<Product|null>}
  */
-export async function GetProductId(productId) {
+export async function getById(productId) {
   const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products WHERE product_id = $1`
   const values = [productId]
-  const result = await db().query(sql, values)
-  return result.rows ?? null
+  const result = await pool.query(sql, values)
+  return result.rows[0] || null
 }
+
 
 /**
- * seacrh product by name
- * @param {string} productName 
- * @returns {Promise<Product[]>}
+ * Create product
+ * @param {Object} data
+ * @returns {Promise<Product>}
  */
-export async function GetProductName(productName) {
-  const sql = `SELECT product_id, kategory_id, name, description, price, image_url FROM products WHERE name ILIKE $1`
-  const values = [`%${productName}%`]
-  const result = await db().query(sql, values)
-  return result.rows ?? null
-}
-
-export async function CreateProduct(data) {
+export async function create(data) {
   const { kategory_id, name, description, price, image_url } = data
 
   const sql = `
     INSERT INTO products (kategory_id, name, description, price, image_url)
     VALUES ($1, $2, $3, $4, $5)
-    RETURNING *`
+    RETURNING product_id, kategory_id, name, description, price, image_url`
 
-  const result = await db().query(sql, [
+  const result = await pool.query(sql, [
     kategory_id,
     name,
     description,
@@ -66,7 +60,13 @@ export async function CreateProduct(data) {
   return result.rows[0]
 }
 
-export async function UpdateProduct(id, data) {
+/**
+ * Update product
+ * @param {number} id
+ * @param {Object} data
+ * @returns {Promise<Product|null>}
+ */
+export async function update(id, data) {
   const { kategory_id, name, description, price, image_url } = data
 
   const sql = `
@@ -77,9 +77,9 @@ export async function UpdateProduct(id, data) {
         price = $5,
         image_url = $6
     WHERE product_id = $1
-    RETURNING *`
+    RETURNING product_id, kategory_id, name, description, price, image_url`
 
-  const result = await db().query(sql, [
+  const result = await pool.query(sql, [
     id,
     kategory_id,
     name,
@@ -88,11 +88,16 @@ export async function UpdateProduct(id, data) {
     image_url
   ])
 
-  return result.rows[0] ?? null
+  return result.rows[0] || null
 }
 
-export async function DeleteProduct(id) {
-  const sql = `DELETE FROM products WHERE product_id = $1 RETURNING *`
-  const result = await db().query(sql, [id])
-  return result.rows[0] ?? null
+/**
+ * Delete product
+ * @param {number} id
+ * @returns {Promise<Product|null>}
+ */
+export async function remove(id) {
+  const sql = `DELETE FROM products WHERE product_id = $1 RETURNING product_id, kategory_id, name, description, price, image_url`
+  const result = await pool.query(sql, [id])
+  return result.rows[0] || null
 }
