@@ -70,3 +70,17 @@ export async function update(id, data) {
   const result = await pool.query(sql, [id, product_id, name, add_price])
   return result.rows[0] || null
 }
+
+/**
+ * Delete
+ */
+export async function remove(id) {
+  const sql = `
+    DELETE FROM product_size
+    WHERE product_size_id = $1
+    RETURNING product_size_id, product_id, name, add_price
+  `
+
+  const result = await pool.query(sql, [id])
+  return result.rows[0] || null
+}
