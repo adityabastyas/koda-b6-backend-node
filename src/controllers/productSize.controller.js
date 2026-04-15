@@ -100,3 +100,47 @@ export async function create(req, res) {
     })
   }
 }
+
+/**
+ * UPDATE
+ */
+export async function update(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
+    }
+
+    const { name } = req.body
+
+    if (!name) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "nama size tidak boleh kosong"
+      })
+    }
+
+    const updated = await pm.update(id, req.body)
+
+    if (!updated) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "size tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "size berhasil diupdate"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
