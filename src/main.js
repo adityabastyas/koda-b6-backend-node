@@ -10,7 +10,7 @@ import productImagesRouter from "./routes/productImages.router.js"
 import productSizeRouter from "./routes/productSize.router.js"
 import productVariantRouter from "./routes/productVariant.router.js"
 import discountRouter from "./routes/discount.router.js"
-
+import reviewsRouter from "./routes/reviews.router.js"
 
 const app = express()
 const PORT = process.env.PORT || 8888
@@ -30,6 +30,7 @@ app.use("/product-images", productImagesRouter)
 app.use("/product-sizes", productSizeRouter)
 app.use("/product-variants", productVariantRouter)
 app.use("/discounts", discountRouter)
+app.use("/reviews", reviewsRouter)
 
 app.listen(PORT, function () {
   console.log(`App listening on port ${PORT}`)
