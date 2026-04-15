@@ -1,5 +1,7 @@
 import { constants } from "node:http2"
 import * as userModel from "../models/users.models.js"
+import { GenerateHash, VerifyHash } from "../lib/hash.js"
+import { GenerateToken } from "../lib/jwt.js"
 
 /**
  * @typedef {import('express').Request} Request
@@ -12,15 +14,15 @@ import * as userModel from "../models/users.models.js"
  * @param {Response} res
  * @returns {Promise<void>}
  */
-export async function getAllUsers(req, res) {
+export async function getAll(req, res) {
   try {
-    const users = await userModel.getAllUsers()
+    const users = await userModel.getAll()
     res.status(constants.HTTP_STATUS_OK).json({
       success: true,
-      data: users
+      message : "success",
+      result: users
     })
   } catch (error) {
-    console.error("Get all users error:", error)
     res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error"
@@ -29,159 +31,151 @@ export async function getAllUsers(req, res) {
 }
 
 /**
- * Get user by ID
+ * Register user
  * @param {Request} req
  * @param {Response} res
  * @returns {Promise<void>}
  */
-export async function getUserById(req, res) {
+export async function register(req, res) {
   try {
-    const user_id = parseInt(req.params.id)
-    const user = await userModel.getUserById(user_id)
+    const { full_name, email, password } = req.body
 
-    if (!user) {
-      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
-        success: false,
-        message: "User not found"
-      })
-    }
-
-    res.status(constants.HTTP_STATUS_OK).json({
-      success: true,
-      data: user
-    })
-  } catch (error) {
-    console.error("Get user by id error:", error)
-    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Internal server error"
-    })
-  }
-}
-
-/**
- * Create new user
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<void>}
- */
-export async function createUser(req, res) {
-  try {
-    const { full_name, email, password, address, phone, profile_pic } = req.body
-
-    if (!full_name || !email || !password) {
+    if (!email || !password) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
         success: false,
-        message: "Full name, email, and password are required"
+        message: "email & password tidak boleh kosong"
       })
     }
 
-    const existingUser = await userModel.findUserByEmail(email)
+    const existingUser = await userModel.findByEmail(email)
     if (existingUser) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
         success: false,
-        message: "Email already exists"
+        message: "email sudah terdaftar"
       })
     }
 
-    const newUser = await userModel.createUser({
-      full_name, email, password, address, phone, profile_pic
+    const hashedPassword = await GenerateHash(password)
+
+    await userModel.save({
+      full_name,
+      email,
+      password: hashedPassword
     })
 
-    res.status(constants.HTTP_STATUS_CREATED).json({
+    res.status(constants.HTTP_STATUS_OK).json({
       success: true,
-      message: "User created successfully",
-      data: newUser
+      message: "register success"
     })
-  } catch (error) {
-    console.error("Create user error:", error)
+  } catch (err) {
     res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error"
+      message: err.message
     })
   }
 }
 
 /**
- * Update user
+ * Login user
  * @param {Request} req
  * @param {Response} res
  * @returns {Promise<void>}
  */
-export async function updateUser(req, res) {
+export async function login(req, res) {
   try {
-    const user_id = parseInt(req.params.id)
-    const { full_name, email, password, address, phone, profile_pic } = req.body
+    const { email, password } = req.body
 
-    if (email !== undefined) {
-      const existingUser = await userModel.findUserByEmail(email)
-      if (existingUser && existingUser.user_id !== user_id) {
-        return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
-          success: false,
-          message: "Email already exists"
-        })
+    const user = await userModel.findByEmail(email)
+
+    if (!user) {
+      return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
+        success: false,
+        message: "email atau password salah"
+      })
+    }
+
+    const valid = await VerifyHash(user.password, password)
+
+    if (!valid) {
+      return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
+        success: false,
+        message: "invalid email or password"
+      })
+    }
+
+    const token = GenerateToken(user.user_id, user.role)
+
+    const { password: _, ...safeUser } = user
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "login success",
+      result: {
+        user: safeUser,
+        token
       }
-    }
-
-    const updateData = {}
-    if (full_name !== undefined) updateData.full_name = full_name
-    if (email !== undefined) updateData.email = email
-    if (password !== undefined) updateData.password = password
-    if (address !== undefined) updateData.address = address
-    if (phone !== undefined) updateData.phone = phone
-    if (profile_pic !== undefined) updateData.profile_pic = profile_pic
-
-    const updatedUser = await userModel.updateUser(user_id, updateData)
-
-    if (!updatedUser) {
-      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
-        success: false,
-        message: "User not found"
-      })
-    }
-
-    res.status(constants.HTTP_STATUS_OK).json({
-      success: true,
-      message: "User updated successfully",
-      data: updatedUser
     })
-  } catch (error) {
-    console.error("Update user error:", error)
+  } catch (err) {
     res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error"
+      message: err.message
     })
   }
 }
 
 /**
- * Delete user
+ * Update profile
  * @param {Request} req
  * @param {Response} res
  * @returns {Promise<void>}
  */
-export async function deleteUser(req, res) {
+export async function updateProfile(req, res) {
   try {
-    const user_id = parseInt(req.params.id)
-    const deletedUser = await userModel.deleteUser(user_id)
+    const userId = res.locals.id
 
-    if (!deletedUser) {
-      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
-        success: false,
-        message: "User not found"
-      })
-    }
+    await userModel.updateProfile(userId, req.body)
 
     res.status(constants.HTTP_STATUS_OK).json({
       success: true,
-      message: "User deleted successfully",
-      data: deletedUser
+      message: "profile berhasil diupdate"
     })
-  } catch (error) {
-    console.error("Delete user error:", error)
+  } catch (err) {
+    res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
+
+/**
+ * Upload user profile picture
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<void>}
+ */
+export async function uploadPhoto(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "file tidak ditemukan"
+      })
+    }
+
+    const path = "./uploads/" + req.file.filename
+    const userId = res.locals.id
+
+    await userModel.updateProfilePic(userId, path)
+
+    res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "upload success",
+      result: path
+    })
+  } catch (err) {
     res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error"
+      message: err.message
     })
   }
 }
