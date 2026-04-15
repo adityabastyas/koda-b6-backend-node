@@ -2,6 +2,8 @@ import { Router } from "express";
 import * as pc from "../controllers/product.controller.js"
 import * as promo from "../controllers/promo.controller.js"
 import * as cart from "../controllers/cart.controller.js"
+import auth from "../middlewares/auth.middleware.js"
+import rbac from "../middlewares/rbac.middleware.js"
 
 
 const productRouter = Router()
@@ -15,20 +17,20 @@ const productRouter = Router()
  *      200:
  *        description: berhasil ambil product
  */
-productRouter.get("",pc.GetAllProduct)
-productRouter.post("", pc.CreateProduct)
-productRouter.patch("/:id", pc.UpdateProduct)
-productRouter.delete("/:id", pc.DeleteProduct)
+productRouter.get("/",pc.getAll)
+productRouter.get("/:id", pc.getById)
+
+
 
 // promo
-productRouter.get("/promo", promo.GetAllPromo)
-productRouter.get("/promo/:id", promo.GetPromoId)
-productRouter.post("/promo", promo.CreatePromo)
-productRouter.patch("/promo/:id", promo.UpdatePromo)
-productRouter.delete("/promo/:id", promo.DeletePromo)
+// productRouter.get("/promo", promo.GetAllPromo)
+// productRouter.get("/promo/:id", promo.GetPromoId)
+// productRouter.post("/promo", promo.CreatePromo)
+// productRouter.patch("/promo/:id", promo.UpdatePromo)
+// productRouter.delete("/promo/:id", promo.DeletePromo)
 
 // cart
-productRouter.get("/cart", cart.GetAllCart)
+// productRouter.get("/cart", cart.GetAllCart)
 
 /**
  * @swagger
@@ -45,7 +47,7 @@ productRouter.get("/cart", cart.GetAllCart)
  *       200:
  *         description: berhasil ambil cart user
  */
-productRouter.get("/cart/user/:user_id", cart.GetCartUserId)
+// productRouter.get("/cart/user/:user_id", cart.GetCartUserId)
 
 /**
  * @swagger
@@ -62,7 +64,7 @@ productRouter.get("/cart/user/:user_id", cart.GetCartUserId)
  *       200:
  *         description: berhasil ambil cart
  */
-productRouter.get("/cart/:id", cart.GetCartId)
+// productRouter.get("/cart/:id", cart.GetCartId)
 
 /**
  * @swagger
@@ -82,7 +84,7 @@ productRouter.get("/cart/:id", cart.GetCartId)
  *       200:
  *         description: berhasil buat cart
  */
-productRouter.post("/cart", cart.CreateCart)
+// productRouter.post("/cart", cart.CreateCart)
 
 /**
  * @swagger
@@ -99,11 +101,11 @@ productRouter.post("/cart", cart.CreateCart)
  *       200:
  *         description: berhasil delete cart
  */
-productRouter.delete("/cart/:id", cart.DeleteCart)
+// productRouter.delete("/cart/:id", cart.DeleteCart)
 
-productRouter.get("/:id", pc.GetProductId)
-productRouter.patch("/:id", pc.UpdateProduct)
-productRouter.delete("/:id", pc.DeleteProduct)
+productRouter.post("/", auth, rbac("admin"), pc.create)
+productRouter.patch("/:id", auth, rbac("admin"), pc.update)
+productRouter.delete("/:id", auth, rbac("admin"), pc.remove)
 
 
 export default productRouter
