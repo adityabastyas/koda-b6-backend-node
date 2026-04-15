@@ -29,3 +29,39 @@ export async function getByProductId(req, res) {
     })
   }
 }
+
+/**
+ * GET BY ID
+ */
+export async function getById(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "id harus berupa angka"
+      })
+    }
+
+    const variant = await pm.getById(id)
+
+    if (!variant) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "variant tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "success",
+      result: variant
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
