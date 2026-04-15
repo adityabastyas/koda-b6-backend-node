@@ -29,3 +29,38 @@ export async function getByProductId(req, res) {
     })
   }
 }
+
+/**
+ * CREATE
+ */
+export async function create(req, res) {
+  try {
+    const { product_id, path } = req.body
+
+    if (!product_id || product_id <= 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "product id tidak valid"
+      })
+    }
+
+    if (!path) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "path tidak boleh kosong"
+      })
+    }
+
+    await pm.create({ product_id, path })
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "image berhasil ditambahkan"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
