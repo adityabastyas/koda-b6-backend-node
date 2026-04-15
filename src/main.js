@@ -9,6 +9,8 @@ import authRouter from "./routes/auth.router.js"
 import productImagesRouter from "./routes/productImages.router.js"
 import productSizeRouter from "./routes/productSize.router.js"
 import productVariantRouter from "./routes/productVariant.router.js"
+import discountRouter from "./routes/discount.router.js"
+
 
 const app = express()
 const PORT = process.env.PORT || 8888
@@ -27,6 +29,7 @@ app.use("/docs", docsRouter)
 app.use("/product-images", productImagesRouter)
 app.use("/product-sizes", productSizeRouter)
 app.use("/product-variants", productVariantRouter)
+app.use("/discounts", discountRouter)
 
 app.listen(PORT, function () {
   console.log(`App listening on port ${PORT}`)
