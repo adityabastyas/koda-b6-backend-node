@@ -35,3 +35,19 @@ export async function getById(id) {
   const result = await pool.query(sql, [id])
   return result.rows[0] || null
 }
+
+/**
+ * Create
+ */
+export async function create(data) {
+  const { product_id, name, add_price } = data
+
+  const sql = `
+    INSERT INTO product_size (product_id, name, add_price)
+    VALUES ($1, $2, $3)
+    RETURNING product_size_id, product_id, name, add_price
+  `
+
+  const result = await pool.query(sql, [product_id, name, add_price])
+  return result.rows[0]
+}
