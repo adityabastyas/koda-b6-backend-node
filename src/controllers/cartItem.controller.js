@@ -78,3 +78,46 @@ export async function create(req, res) {
     })
   }
 }
+
+/**
+ * UPDATE QUANTITY
+ */
+export async function update(req, res) {
+  try {
+    const id = parseInt(req.params.id)
+    const quantity = parseInt(req.query.quantity)
+
+    if (isNaN(id)) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "cart item id tidak valid"
+      })
+    }
+
+    if (isNaN(quantity) || quantity < 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "quantity tidak valid"
+      })
+    }
+
+    const updated = await cim.update(id, quantity)
+
+    if (!updated) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "item tidak ditemukan"
+      })
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "quantity berhasil diupdate"
+    })
+  } catch (err) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
