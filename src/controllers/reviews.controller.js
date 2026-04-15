@@ -20,3 +20,25 @@ export async function GetAll(req, res) {
     })
   }
 }
+
+/**
+ * GET BY PRODUCT ID
+ */
+export async function GetByProductId(req, res) {
+  const id = parseInt(req.params.product_id)
+
+  if (isNaN(id)) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: "product id harus berupa angka"
+    })
+  }
+
+  const data = await rm.getByProductId(id)
+
+  return res.status(constants.HTTP_STATUS_OK).json({
+    success: true,
+    message: "success",
+    result: data
+  })
+}
